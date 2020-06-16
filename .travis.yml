@@ -1,0 +1,13 @@
+script:
+	# RUn the tests
+	- g++ test.cpp
+	- ./a.out
+	# Release mode (optional)
+
+	- g++ -DNDEBUG test.cpp
+
+	- ./a.out
+
+
+
+
