@@ -15,6 +15,9 @@ int main() {
 	#else
 	assert(1==2);//faslse but must be removed in release mode
 	std::cout << "Release mode\n";
+	
+	// add std::cout in br1
+	std::cout << "br1" << std::endl;
 
 	#endif
 
