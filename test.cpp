@@ -9,7 +9,7 @@ void test(){
 int main() {
 	#ifndef NDEBUG
 	std::cout << "Debug mode\n";
-	print("hello");
+	printf("hello");
 
 	test(); 
 	#else
