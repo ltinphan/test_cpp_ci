@@ -9,7 +9,7 @@ void test(){
 int main() {
 	#ifndef NDEBUG
 	std::cout << "Debug mode\n";
-	prin("hello")
+	print("hello");
 
 	test(); 
 	#else
@@ -20,38 +20,3 @@ int main() {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
