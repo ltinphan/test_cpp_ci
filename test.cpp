@@ -12,6 +12,7 @@ int main() {
 	std::cout << "Hello" << std::endl;
 
 	test(); 
+	pti
 	#else
 	assert(1==2);//faslse but must be removed in release mode
 	std::cout << "Release mode\n";
