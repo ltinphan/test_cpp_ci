@@ -7,7 +7,7 @@ void test(){
 }
 
 int main() {
-	#ifndef NDEBUG
+	#ifndef NDEBasdfsdUG
 	std::cout << "Debug mode\n";
 	std::cout << "Hello" << std::endl;
 
