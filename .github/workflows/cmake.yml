@@ -101,7 +101,7 @@ jobs:
       run: |
         upload_url=`cat ./upload_url`
         echo ::set-output name=upload_url::$upload_url
-    - name: Download URL
+    - name: Download artifact for release
       uses: actions/download-artifact@v1
       with:
         name: ${{ matrix.config.artifact }}
