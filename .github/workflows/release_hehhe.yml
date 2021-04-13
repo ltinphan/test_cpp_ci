@@ -1,7 +1,8 @@
-name: Release_test
+name: Release_hehe
 
 on:
   pull_request:
+    branches: [ master ]
     tags:
       - 'v*'
 
