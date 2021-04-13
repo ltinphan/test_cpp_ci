@@ -1,12 +1,14 @@
 name: CMake
 
-on: [pull_request]
-
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
 
-jobs:
   build:
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
@@ -100,3 +102,14 @@ jobs:
         registry: docker.pkg.github.com
         repository: ltinphan/github-actions-for-packages/test_cpp
         tag_with_sha: true
+
+  cpp_style_check:
+    runs-on: ubuntu-latest
+    name: Check C++ Style
+    steps:
+    - name: Checkout this commit
+      uses: actions/checkout@v2
+    - name: Run style checks
+      uses: coleaeason/actions-uncrustify@v1
+      with: 
+        configPath: 'myConfig.cfg'
