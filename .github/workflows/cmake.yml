@@ -101,6 +101,11 @@ jobs:
       run: |
         upload_url=`cat ./upload_url`
         echo ::set-output name=upload_url::$upload_url
+    - name: Download URL
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{ matrix.config.artifact }}
+        path: ./
     - name: Upload to Release
       id: upload_to_release
       uses: actions/upload-release-asset@v1.0.1
@@ -108,7 +113,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: ${{github.workspace}}
+        asset_path: ./
         asset_name: ${{ matrix.config.artifact }}
         asset_content_type: application/x-gtar
 
