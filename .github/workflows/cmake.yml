@@ -86,12 +86,14 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # uses: actions/create-release@master
+      uses: "marvinpinto/action-automatic-releases@latest"
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         # tag_name: binaries-${{ github.sha }}
-        tag_name: ${{ github.ref }}
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
