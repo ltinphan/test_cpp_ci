@@ -112,4 +112,4 @@ env:
     - name: Run style checks
       uses: coleaeason/actions-uncrustify@v1
       with: 
-        configPath: 'myConfig.cfg'
+        configPath: 'cpp_style.cfg'
