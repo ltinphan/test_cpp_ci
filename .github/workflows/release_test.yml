@@ -1,7 +1,7 @@
-name: Release
+name: Release_test
 
 on:
-  push:
+  pull_request:
     tags:
       - 'v*'
 
