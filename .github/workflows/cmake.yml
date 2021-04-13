@@ -92,10 +92,10 @@ jobs:
       id: create_release
       uses: actions/create-release@v1.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{github.ref}}
+        release_name: Release ${{github.ref}}
         draft: false
         prerelease: false
 
@@ -110,8 +110,8 @@ jobs:
 
   publish:
     if: contains(github.ref, 'tags/v')
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    name: ${{matrix.config.name}}
+    runs-on: ${{matrix.config.os}}
     strategy:
       fail-fast: false
       matrix:
@@ -137,7 +137,7 @@ jobs:
     - name: Download artifact
       uses: actions/download-artifact@v1
       with:
-        name: ${{ matrix.config.artifact }}
+        name: ${{matrix.config.artifact}}
         path: ./
 
     - name: Download URL
@@ -154,11 +154,11 @@ jobs:
       id: upload_to_release
       uses: actions/upload-release-asset@v1.0.1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
-        asset_path: ./${{ matrix.config.artifact }}
-        asset_name: ${{ matrix.config.artifact }}
+        upload_url: ${{steps.set_upload_url.outputs.upload_url}}
+        asset_path: ./${{matrix.config.artifact}}
+        asset_name: ${{matrix.config.artifact}}
         asset_content_type: application/x-gtar
 
   cpp_style_check:
