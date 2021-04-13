@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     # runs-on: [ubuntu-latest, windows-2016]
     strategy:
-      fail-fast: false 
+      fail-fast: false
       matrix:
         config:
         - {
@@ -25,7 +25,7 @@ jobs:
             cc: "cl", cxx: "cl"
           }
         - {
-            name: "Ubuntu-latest", artifact: "ubuntu-gcc-.tar.xz",
+            name: "Ubuntu-latest-GCC", artifact: "ubuntu-gcc-.tar.xz",
             os: ubuntu-latest,
             cc: "gcc-9", cxx: "g++-9"
           }
@@ -33,7 +33,7 @@ jobs:
             name: "Ubuntu Latest - Clang", artifact: "ubuntu-clang.tar.xz",
             os: ubuntu-latest,
             cc: "clang-9", cxx: "clang++-9"
-          }     
+          }
     steps:
     - uses: actions/checkout@v2
       with:
