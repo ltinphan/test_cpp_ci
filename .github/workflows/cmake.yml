@@ -70,7 +70,7 @@ jobs:
     - uses: actions/upload-artifact@master
       with:
         name: webpack artifacts
-        path: public/
+        path: ${{github.workspace}}/build/
 
     - name: Test
       working-directory: ${{github.workspace}}/build
