@@ -67,6 +67,11 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
+    - uses: actions/upload-artifact@master
+      with:
+        name: webpack artifacts
+        path: public/
+
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
@@ -76,7 +81,7 @@ jobs:
   
   Build-and-Push-Docker-Image:
     runs-on: ubuntu-latest
-    needs: build
+    needs: test
     name: Docker Build, Tag, Push
 
     steps:
