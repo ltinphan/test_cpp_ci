@@ -1,14 +1,13 @@
-name: Release_hehe
+name: Release_test
 
 on:
   pull_request:
-    branches: [ master ]
     tags:
       - 'v*'
 
 jobs:
-  releasehehe:
-    name: Release222
+  release:
+    name: Release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

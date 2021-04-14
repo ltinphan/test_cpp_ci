@@ -1,7 +1,12 @@
 name: CMake
 
-on: [push]
-
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    tags:
+      - 'v*'
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
@@ -12,14 +17,43 @@ jobs:
     # well on Windows or Mac.  You can convert this to a matrix build if you need
     # cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    runs-on: ubuntu-latest
-
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    # runs-on: [ubuntu-latest, windows-2016]
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows Latest - MSVC", artifact: "windows-msvc.tar.xz",
+            os: windows-latest,
+            cc: "cl", cxx: "cl"
+          }
+        - {
+            name: "Ubuntu-latest-GCC", artifact: "ubuntu-gcc-.tar.xz",
+            os: ubuntu-latest,
+            cc: "gcc-9", cxx: "g++-9"
+          }
+        - {
+            name: "Ubuntu Latest - Clang", artifact: "ubuntu-clang.tar.xz",
+            os: ubuntu-latest,
+            cc: "clang-9", cxx: "clang++-9"
+          }
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
 
-    - name: Create Build Environment
+    - name: Create Build Linux Environment
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
+      if: runner.os == 'Linux'
+      run: cmake -E make_directory ${{github.workspace}}/build
+
+    - name: Create Build Windows Environment
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+      if: runner.os == 'Windows'
       run: cmake -E make_directory ${{github.workspace}}/build
 
     - name: Configure CMake
@@ -30,7 +64,7 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }}
 
     - name: Build
       working-directory: ${{github.workspace}}/build
@@ -38,9 +72,211 @@ jobs:
       # Execute the build.  You can specify a specific target with "--target <NAME>"
       run: cmake --build . --config $BUILD_TYPE
 
+    - uses: actions/upload-artifact@master
+      with:
+        name: ${{matrix.config.artifact}}
+        path: ${{github.workspace}}
+
     - name: Test
       working-directory: ${{github.workspace}}/build
       shell: bash
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C $BUILD_TYPE
+
+    - name: Create Release
+      id: create_release
+      # uses: actions/create-release@master
+      uses: "marvinpinto/action-automatic-releases@latest"
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        # tag_name: binaries-${{ github.sha }}
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "latest"
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    # - name: Store Release url
+    #   run: |
+    #     echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+    # - id: set_upload_url
+    #   run: |
+    #     upload_url=`cat ./upload_url`
+    #     echo ::set-output name=upload_url::$upload_url
+    # - name: Download artifact for release
+    #   uses: actions/download-artifact@v1
+    #   with:
+    #     name: ${{ matrix.config.artifact }}
+    #     path: ./
+    # - name: Upload to Release
+    #   id: upload_to_release
+    #   uses: actions/upload-release-asset@v1.0.1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
+    #     asset_path: ./
+    #     asset_name: ${{ matrix.config.artifact }}
+    #     asset_content_type: application/x-gtar
+
+  # release:
+  #   # if: contains(github.ref, 'tags/v')
+  #   runs-on: ubuntu-latest
+  #   needs: build
+
+  #   steps:
+  #   - name: Create Release
+  #     id: create_release
+  #     uses: actions/create-release@v1.0.0
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       tag_name: binaries-${{ github.sha }}
+  #       release_name: Release ${{ github.sha }}
+  #       draft: false
+  #       prerelease: false
+
+    # - name: Store Release url
+    #   run: |
+    #     echo "${{ steps.create_release.outputs.upload_url }}" > ./upload_url
+
+  #   - uses: actions/upload-artifact@v1
+  #     with:
+  #       path: ./upload_url
+  #       name: upload_url
+
+  # publish:
+  #   # if: contains(github.ref, 'tags/v')
+  #   name: ${{ matrix.config.name }}
+  #   runs-on: ${{ matrix.config.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       config:
+  #       - {
+  #           name: "Windows Latest - MSVC", artifact: "windows-msvc.tar.xz",
+  #           os: windows-latest,
+  #           cc: "cl", cxx: "cl"
+  #         }
+  #       - {
+  #           name: "Ubuntu-latest-GCC", artifact: "ubuntu-gcc-.tar.xz",
+  #           os: ubuntu-latest,
+  #           cc: "gcc-9", cxx: "g++-9"
+  #         }
+  #       - {
+  #           name: "Ubuntu Latest - Clang", artifact: "ubuntu-clang.tar.xz",
+  #           os: ubuntu-latest,
+  #           cc: "clang-9", cxx: "clang++-9"
+  #         }
+  #   needs: release
+
+  #   steps:
+  #   - name: Download artifact
+  #     uses: actions/download-artifact@v1
+  #     with:
+  #       name: ${{ matrix.config.artifact }}
+  #       path: ./
+
+  #   - name: Download URL
+  #     uses: actions/download-artifact@v1
+  #     with:
+  #       name: upload_url
+  #       path: ./
+    # - id: set_upload_url
+    #   run: |
+    #     upload_url=`cat ./upload_url`
+    #     echo ::set-output name=upload_url::$upload_url
+
+  #   - name: Upload to Release
+  #     id: upload_to_release
+  #     uses: actions/upload-release-asset@v1.0.1
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     with:
+  #       upload_url: ${{ steps.set_upload_url.outputs.upload_url }}
+  #       asset_path: ./${{ matrix.config.artifact }}
+  #       asset_name: ${{ matrix.config.artifact }}
+  #       asset_content_type: application/x-gtar
+
+  cpp_style_check:
+    runs-on: ubuntu-latest
+    name: Check C++ Style
+    steps:
+    - name: Checkout this commit
+      uses: actions/checkout@v2
+    - name: Run style checks
+      uses: coleaeason/actions-uncrustify@v1
+      with:
+        configPath: 'cpp_style.cfg'
+
+  # release2:
+  #   name: Release 2
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [macOS-latest, windows-latest, ubuntu-latest]
+  #       include:
+  #         - os: macOS-latest
+  #           archive: tar
+  #           output: streamlib-${{ github.sha }}-x86_64-apple-darwin.tar.gz
+  #           content_type: application/gzip
+  #         - os: windows-latest
+  #           archive: zip
+  #           output: streamlib-${{ github.sha }}-x86_64-pc-windows-msvc.zip
+  #           content_type: application/zip
+  #         - os: ubuntu-latest
+  #           archive: tar
+  #           output: streamlib-${{ github.sha }}-x86_64-unknown-linux-gnu.tar.gz
+  #           content_type: application/gzip
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v1
+
+  #     - name: Install toolchain
+  #       uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: stable
+
+  #     - name: Build
+  #       run: cargo build --verbose --release
+
+  #     - name: Test
+  #       run: cargo test --verbose
+
+  #     - name: Build ZIP
+  #       id: build_zip
+  #       if: matrix.archive == 'zip'
+  #       run: |
+  #         cp target/release/streamlib.exe .
+  #         7z a ${{ matrix.output }} streamlib.exe
+  #     - name: Build TAR
+  #       id: build_tar
+  #       if: matrix.archive == 'tar'
+  #       run: |
+  #         cp target/release/streamlib .
+  #         tar czvf ${{ matrix.output }} streamlib
+  #     - name: Upload
+  #       uses: actions/upload-artifact@master
+  #       with:
+  #         name: ${{ matrix.output }}
+  #         path: ${{ matrix.output }}
+
+  build22:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout222
+        uses: actions/checkout@v2
+      - name: Build222
+        run: echo ${{ github.sha }} > Release.txt
+      - name: Test222
+        run: cat Release.txt
+      - name: Release222
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: Release.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
